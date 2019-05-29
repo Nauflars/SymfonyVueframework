@@ -4,7 +4,7 @@
 $(function() {
     var $modal = $('#sourceCodeModal');
     var $controllerCode = $modal.find('code.php');
-    var $templateCode = $modal.find('code.twig');
+    var $templateCode = $modal.find('code.twig' );
 
     function anchor(url, content) {
         return '<a class="doclink" target="_blank" href="' + url + '">' + content + '</a>';
