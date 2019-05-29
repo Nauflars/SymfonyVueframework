@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -13,9 +22,19 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    private const CONFIG_EXTS = '.{php,xml,yaml,yml}';
+    const CONFIG_EXTS = '.{php,xml,yaml,yml}';
 
-    public function registerBundles(): iterable
+    public function getCacheDir()
+    {
+        return $this->getProjectDir().'/var/cache/'.$this->environment;
+    }
+
+    public function getLogDir()
+    {
+        return $this->getProjectDir().'/var/log';
+    }
+
+    public function registerBundles()
     {
         $contents = require $this->getProjectDir().'/config/bundles.php';
         foreach ($contents as $class => $envs) {
@@ -25,12 +44,7 @@ class Kernel extends BaseKernel
         }
     }
 
-    public function getProjectDir(): string
-    {
-        return \dirname(__DIR__);
-    }
-
-    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader)
     {
         $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
         $container->setParameter('container.dumper.inline_class_loader', true);
@@ -42,12 +56,12 @@ class Kernel extends BaseKernel
         $loader->load($confDir.'/{services}_'.$this->environment.self::CONFIG_EXTS, 'glob');
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    protected function configureRoutes(RouteCollectionBuilder $routes)
     {
         $confDir = $this->getProjectDir().'/config';
 
-        $routes->import($confDir.'/{routes}/'.$this->environment.'/**/*'.self::CONFIG_EXTS, '/', 'glob');
         $routes->import($confDir.'/{routes}/*'.self::CONFIG_EXTS, '/', 'glob');
+        $routes->import($confDir.'/{routes}/'.$this->environment.'/**/*'.self::CONFIG_EXTS, '/', 'glob');
         $routes->import($confDir.'/{routes}'.self::CONFIG_EXTS, '/', 'glob');
     }
 }
